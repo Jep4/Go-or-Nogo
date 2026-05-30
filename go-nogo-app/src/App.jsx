@@ -1,10 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+// shadcn/ui 없이 Vite 기본 React 프로젝트에서 바로 실행되도록 만든 간단한 UI 컴포넌트입니다.
 import { Play, RotateCcw, Save, Sparkles, Settings, Trophy, Zap } from "lucide-react";
 
 const STORAGE_KEY = "go-nogo-practice-config-v1";
@@ -483,9 +479,43 @@ export default function GoNoGoPracticeApp() {
   );
 }
 
+function Button({ children, className = "", variant = "primary", disabled = false, ...props }) {
+  const base = "inline-flex items-center justify-center gap-2 border transition disabled:cursor-not-allowed disabled:opacity-50";
+  const variants = {
+    primary: "border-violet-500 bg-violet-600 text-white hover:bg-violet-500",
+    secondary: "border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700",
+  };
+
+  return (
+    <button className={`${base} ${variants[variant] || variants.primary} ${className}`} disabled={disabled} {...props}>
+      {children}
+    </button>
+  );
+}
+
+function Card({ children, className = "" }) {
+  return <div className={className}>{children}</div>;
+}
+
+function CardContent({ children, className = "" }) {
+  return <div className={className}>{children}</div>;
+}
+
+function Input({ className = "", ...props }) {
+  return <input className={`px-3 py-2 outline-none ${className}`} {...props} />;
+}
+
+function Textarea({ className = "", ...props }) {
+  return <textarea className={`px-3 py-2 outline-none ${className}`} {...props} />;
+}
+
+function Badge({ children, className = "" }) {
+  return <span className={`inline-flex items-center ${className}`}>{children}</span>;
+}
+
 function StatCard({ label, value }) {
   return (
-    <Card className="rounded-3xl border-slate-800 bg-slate-900/70 shadow-xl">
+    <Card className="rounded-3xl border border-slate-800 bg-slate-900/70 shadow-xl">
       <CardContent className="p-4">
         <div className="text-xs font-bold uppercase tracking-wider text-slate-500">{label}</div>
         <div className="mt-2 text-2xl font-black text-slate-100">{value}</div>
@@ -502,7 +532,7 @@ function NumberInput({ label, value, onChange }) {
         type="number"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="rounded-2xl border-slate-700 bg-slate-950 text-slate-100"
+        className="w-full rounded-2xl border border-slate-700 bg-slate-950 text-slate-100"
       />
     </label>
   );
