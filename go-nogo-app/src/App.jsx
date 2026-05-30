@@ -86,12 +86,12 @@ function createTrial(config) {
 }
 
 const FEEDBACK_STYLES = {
-  hit: "border-[#f59e0b] bg-[#fff0b8] text-[#5f3400]",
-  good: "border-[#34d399] bg-[#dcfce7] text-[#14532d]",
-  bad: "border-[#fb7185] bg-[#ffe0e6] text-[#881337]",
-  saved: "border-[#60a5fa] bg-[#dbeafe] text-[#1e3a8a]",
-  ready: "border-[#c084fc] bg-[#f3e8ff] text-[#6b21a8]",
-  done: "border-[#94a3b8] bg-[#f8fafc] text-[#334155]",
+  hit: "border-[#f4a621] bg-[#fff3cf] text-[#7b4b00]",
+  good: "border-[#59b87a] bg-[#e7f7e8] text-[#215233]",
+  bad: "border-[#e07a87] bg-[#ffe8eb] text-[#7a2431]",
+  saved: "border-[#77a9f6] bg-[#eaf2ff] text-[#1f4b8f]",
+  ready: "border-[#a78bfa] bg-[#f1ebff] text-[#5b3ca8]",
+  done: "border-[#b9b7ae] bg-[#faf8f1] text-[#4f4a3c]",
 };
 
 export default function GoNoGoPracticeApp() {
@@ -171,7 +171,7 @@ export default function GoNoGoPracticeApp() {
       setNoGoInput(nextConfig.noGoWords.join(", "));
       setJsonText(JSON.stringify(nextConfig, null, 2));
       setTimeLeft(nextConfig.testTimeSec);
-      setFeedback({ type: "saved", text: "전술서 설정을 적용했습니다." });
+      setFeedback({ type: "saved", text: "전술 설정을 적용했습니다." });
     } catch {
       setFeedback({ type: "bad", text: "JSON 형식이 올바르지 않습니다." });
     }
@@ -218,7 +218,7 @@ export default function GoNoGoPracticeApp() {
     setTimeLeft(nextConfig.testTimeSec);
     resetScore();
     setIsRunning(true);
-    setFeedback({ type: "ready", text: "GO 단어가 뜨면 스페이스나 공격 버튼을 누르세요." });
+    setFeedback({ type: "ready", text: "GO 단어가 뜨면 스페이스 또는 공격 버튼을 누르세요." });
 
     const firstTrial = createTrial(nextConfig);
     setCurrentTrial(firstTrial);
@@ -311,22 +311,23 @@ export default function GoNoGoPracticeApp() {
   const feedbackClass = FEEDBACK_STYLES[feedback?.type || "done"];
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#8fd3ff_0%,#bce9ff_34%,#f8f3c2_34%,#f8f3c2_100%)] px-3 py-4 font-mono text-[#3b2f1b] sm:px-4 sm:py-6 lg:px-8">
-      <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-7xl flex-col gap-4 rounded-none border-4 border-[#5b4a2f] bg-[#fff8d6] p-3 shadow-[8px_8px_0_0_#5b4a2f] sm:gap-6 sm:p-5 lg:p-6">
-        <header className="relative overflow-hidden border-4 border-[#5b4a2f] bg-[linear-gradient(180deg,#fef7cc_0%,#f5dd8b_100%)] px-4 py-5 shadow-[inset_0_0_0_4px_#fff5b5] sm:px-6 sm:py-6">
-          <div className="absolute inset-x-0 top-0 h-12 bg-[linear-gradient(90deg,rgba(255,255,255,0.6),transparent,rgba(255,255,255,0.6))]" />
+    <div className="min-h-screen bg-[#f8f3e3] px-3 py-4 text-[#41331c] sm:px-4 sm:py-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-7xl flex-col gap-4 border-[3px] border-[#6d5b3d] bg-[#fffdf6] p-3 shadow-[10px_10px_0_0_#d9ccb0] sm:gap-6 sm:p-5 lg:p-6">
+        <header className="relative overflow-hidden border-[3px] border-[#6d5b3d] bg-[linear-gradient(180deg,#f8e7b3_0%,#f4d47b_100%)] px-4 py-5 shadow-[inset_0_0_0_3px_#fff4ce] sm:px-6 sm:py-6">
+          <div className="absolute inset-x-0 top-0 h-14 bg-[linear-gradient(90deg,rgba(255,255,255,0.55),transparent,rgba(255,255,255,0.55))]" />
           <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 border-2 border-[#5b4a2f] bg-[#fff7dc] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-[#7a4b14]">
+              <div className="inline-flex items-center gap-2 border-2 border-[#6d5b3d] bg-[#fff9e8] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.24em] text-[#8b5e1c]">
                 <WandSparkles className="h-4 w-4" />
                 Pixel Quest Training
               </div>
-              <h1 className="mt-3 text-3xl font-black tracking-[0.08em] text-[#6a3f12] sm:text-4xl lg:text-5xl">
+              <h1 className="mt-3 text-[32px] font-extrabold tracking-[-0.03em] text-[#5d4215] sm:text-[42px] lg:text-[52px]">
                 용사의 반응 수련장
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-[#5d4c2b] sm:text-base">
-                밝은 필드맵과 픽셀 RPG 메뉴창 느낌으로 다듬은 Go / No-Go 훈련입니다. 웹에서는 넓게,
-                앱에서는 세로형으로 안정적으로 사용할 수 있게 구성했습니다.
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[#64553b] sm:text-base">
+                60%는 밝은 배경과 여백, 30%는 하늘빛과 들판빛 보조 톤, 10%는 버튼과 포인트에 쓰인
+                따뜻한 주황색으로 구성한 픽셀 RPG 스타일 훈련 화면입니다. 한국어 문장이 편하게 읽히도록
+                대비와 행간도 함께 정리했습니다.
               </p>
             </div>
 
@@ -337,11 +338,7 @@ export default function GoNoGoPracticeApp() {
                 {isRunning ? "훈련 중지" : "훈련 시작"}
                 {!isRunning && <Play className="h-4 w-4" />}
               </ActionButton>
-              <ActionButton
-                onClick={resetScore}
-                variant="secondary"
-                className="col-span-2 sm:col-span-1"
-              >
+              <ActionButton onClick={resetScore} variant="secondary" className="col-span-2 sm:col-span-1">
                 전적 초기화
                 <RotateCcw className="h-4 w-4" />
               </ActionButton>
@@ -351,11 +348,12 @@ export default function GoNoGoPracticeApp() {
 
         <main className="grid flex-1 gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.85fr)]">
           <section className="flex min-h-0 flex-col gap-4">
-            <Panel className="relative flex-1 overflow-hidden bg-[linear-gradient(180deg,#9fe1ff_0%,#d8f4ff_34%,#82d173_34%,#5cab52_100%)] p-0">
-              <div className="absolute inset-x-0 top-0 h-4 bg-[repeating-linear-gradient(90deg,#ffffff_0_12px,#d6f5ff_12px_24px)] opacity-60" />
-              <div className="absolute inset-x-0 bottom-0 h-28 bg-[repeating-linear-gradient(90deg,#6cba5d_0_18px,#77c567_18px_36px)]" />
+            <Panel className="relative flex-1 overflow-hidden bg-[#dff3fb] p-0">
+              <div className="absolute inset-x-0 top-0 h-[38%] bg-[repeating-linear-gradient(90deg,#dff3fb_0_28px,#d6eef8_28px_56px)]" />
+              <div className="absolute inset-x-0 top-[38%] h-[26%] bg-[repeating-linear-gradient(90deg,#ecf9ff_0_28px,#d7f0fb_28px_56px)]" />
+              <div className="absolute inset-x-0 bottom-0 h-[36%] bg-[repeating-linear-gradient(90deg,#8cd17d_0_24px,#7bc46b_24px_48px)]" />
 
-              <div className="relative flex min-h-[460px] flex-col justify-between px-4 py-4 sm:px-6 sm:py-5">
+              <div className="relative flex min-h-[480px] flex-col justify-between px-4 py-4 sm:px-6 sm:py-5">
                 <div className="grid gap-3 sm:grid-cols-3">
                   <BattleStat label="정확도" value={`${accuracy}%`} note="명중률" />
                   <BattleStat
@@ -363,11 +361,11 @@ export default function GoNoGoPracticeApp() {
                     value={averageReactionTime ? `${averageReactionTime}ms` : "-"}
                     note="속도"
                   />
-                  <BattleStat label="최고 콤보" value={`${bestCombo}`} note="연속" />
+                  <BattleStat label="최고 콤보" value={`${bestCombo}`} note="연속 기록" />
                 </div>
 
                 <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
-                  <div className="mb-4 inline-flex items-center gap-2 border-2 border-[#5b4a2f] bg-[#fffbe6] px-3 py-1 text-xs font-bold tracking-[0.22em] text-[#7a4b14]">
+                  <div className="mb-4 inline-flex items-center gap-2 border-2 border-[#6d5b3d] bg-[#fffdf4] px-3 py-1 text-xs font-bold tracking-[0.16em] text-[#7a5620]">
                     <Shield className="h-4 w-4" />
                     {currentTrial ? `조우 타입 ${currentTrial.type}` : "전투 대기"}
                   </div>
@@ -382,11 +380,11 @@ export default function GoNoGoPracticeApp() {
                         transition={{ type: "spring", stiffness: 220, damping: 18 }}
                         className="w-full max-w-2xl"
                       >
-                        <div className="border-4 border-[#5b4a2f] bg-[#fffdf2] px-5 py-10 shadow-[8px_8px_0_0_#c4974d] sm:px-8 sm:py-14">
-                          <div className="mb-4 text-xs font-bold uppercase tracking-[0.45em] text-[#b06a11]">
+                        <div className="border-[3px] border-[#6d5b3d] bg-[#fffdf6] px-5 py-10 shadow-[8px_8px_0_0_#d4c7a7] sm:px-8 sm:py-14">
+                          <div className="mb-4 text-xs font-bold uppercase tracking-[0.35em] text-[#c88618]">
                             {currentTrial.type === "GO" ? "Attack Command" : "Trap Command"}
                           </div>
-                          <div className="break-words text-4xl font-black tracking-[0.08em] text-[#4d3514] sm:text-6xl lg:text-7xl">
+                          <div className="break-words text-4xl font-extrabold tracking-[-0.03em] text-[#4c3616] sm:text-6xl lg:text-7xl">
                             {currentTrial.word}
                           </div>
                         </div>
@@ -395,14 +393,14 @@ export default function GoNoGoPracticeApp() {
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="w-full max-w-xl border-4 border-[#5b4a2f] bg-[#fffdf2] px-6 py-10 shadow-[8px_8px_0_0_#c4974d]"
+                        className="w-full max-w-xl border-[3px] border-[#6d5b3d] bg-[#fffdf6] px-6 py-10 shadow-[8px_8px_0_0_#d4c7a7]"
                       >
-                        <Trophy className="mx-auto mb-4 h-14 w-14 text-[#d97706]" />
-                        <div className="text-2xl font-black tracking-[0.08em] text-[#5a3b14]">
+                        <Trophy className="mx-auto mb-4 h-14 w-14 text-[#e79821]" />
+                        <div className="text-2xl font-extrabold tracking-[-0.03em] text-[#5c4017]">
                           여정을 시작할 준비가 되었습니다
                         </div>
-                        <p className="mt-3 text-sm leading-6 text-[#725b2d]">
-                          GO 단어가 나타나면 바로 공격하고, NOGO 단어가 나타나면 침착하게 멈추세요.
+                        <p className="mt-3 text-sm leading-7 text-[#6c5b3a]">
+                          GO 단어가 나타나면 바로 반응하고, NOGO 단어가 나타나면 침착하게 멈추세요.
                         </p>
                       </motion.div>
                     )}
@@ -417,7 +415,7 @@ export default function GoNoGoPracticeApp() {
                         initial={{ opacity: 0, y: 14 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className={`border-4 px-4 py-3 text-center text-sm font-bold shadow-[6px_6px_0_0_rgba(91,74,47,0.25)] sm:text-base ${feedbackClass}`}
+                        className={`border-[3px] px-4 py-3 text-center text-sm font-semibold shadow-[6px_6px_0_0_rgba(109,91,61,0.18)] sm:text-base ${feedbackClass}`}
                       >
                         {feedback.text}
                       </motion.div>
@@ -431,7 +429,7 @@ export default function GoNoGoPracticeApp() {
                   >
                     <Swords className="h-5 w-5" />
                     공격하기
-                    <span className="border border-black/20 bg-white/35 px-2 py-1 text-[11px] tracking-[0.2em] text-[#5a3b14]">
+                    <span className="border border-black/15 bg-white/40 px-2 py-1 text-[11px] tracking-[0.14em] text-[#6a4a1a]">
                       SPACE
                     </span>
                   </ActionButton>
@@ -449,11 +447,11 @@ export default function GoNoGoPracticeApp() {
           </section>
 
           <aside className="flex min-h-0 flex-col gap-4">
-            <Panel className="bg-[#fff4c4] p-4 sm:p-5">
+            <Panel className="bg-[#f4efe2] p-4 sm:p-5">
               <SectionTitle icon={Save} title="명령어 도감" />
 
               <label className="mt-4 block space-y-2">
-                <span className="text-sm font-bold text-[#8c4d12]">GO 단어</span>
+                <span className="text-sm font-semibold text-[#875519]">GO 단어</span>
                 <Textarea
                   value={goInput}
                   onChange={(event) => setGoInput(event.target.value)}
@@ -463,7 +461,7 @@ export default function GoNoGoPracticeApp() {
               </label>
 
               <label className="mt-4 block space-y-2">
-                <span className="text-sm font-bold text-[#9f2642]">NOGO 단어</span>
+                <span className="text-sm font-semibold text-[#96516a]">NOGO 단어</span>
                 <Textarea
                   value={noGoInput}
                   onChange={(event) => setNoGoInput(event.target.value)}
@@ -478,7 +476,7 @@ export default function GoNoGoPracticeApp() {
               </ActionButton>
             </Panel>
 
-            <Panel className="bg-[#fff4c4] p-4 sm:p-5">
+            <Panel className="bg-[#eef5f6] p-4 sm:p-5">
               <SectionTitle icon={TimerReset} title="전술 세팅" />
 
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -500,7 +498,7 @@ export default function GoNoGoPracticeApp() {
               </div>
 
               <label className="mt-4 block space-y-2">
-                <span className="text-sm font-bold text-[#6247aa]">JSON 전술서</span>
+                <span className="text-sm font-semibold text-[#4d63a6]">JSON 전술서</span>
                 <Textarea
                   value={jsonText}
                   onChange={(event) => setJsonText(event.target.value)}
@@ -512,8 +510,8 @@ export default function GoNoGoPracticeApp() {
                 JSON 적용
               </ActionButton>
 
-              <p className="mt-4 text-xs leading-6 text-[#6d5a32]">
-                설정은 현재 브라우저의 localStorage에 저장됩니다. 같은 기기와 주소에서 다시 열면 이어서
+              <p className="mt-4 text-xs leading-6 text-[#5d6256]">
+                설정은 현재 브라우저의 `localStorage`에 저장됩니다. 같은 기기와 주소에서 다시 열면 이어서
                 사용할 수 있습니다.
               </p>
             </Panel>
@@ -525,59 +523,55 @@ export default function GoNoGoPracticeApp() {
 }
 
 function Panel({ children, className = "" }) {
-  return (
-    <div className={`border-4 border-[#5b4a2f] shadow-[6px_6px_0_0_#5b4a2f] ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`border-[3px] border-[#6d5b3d] shadow-[6px_6px_0_0_#d8ccb2] ${className}`}>{children}</div>;
 }
 
 function SectionTitle({ icon: Icon, title }) {
   return (
-    <div className="flex items-center gap-2 text-[#6a3f12]">
-      <div className="border-2 border-[#5b4a2f] bg-[#fffbe6] p-2">
+    <div className="flex items-center gap-2 text-[#5d4215]">
+      <div className="border-2 border-[#6d5b3d] bg-[#fffaf0] p-2">
         <Icon className="h-4 w-4" />
       </div>
-      <h2 className="text-lg font-black tracking-[0.08em] sm:text-xl">{title}</h2>
+      <h2 className="text-lg font-bold tracking-[-0.02em] sm:text-xl">{title}</h2>
     </div>
   );
 }
 
 function StatusBadge({ icon: Icon, label, value }) {
   return (
-    <div className="border-4 border-[#5b4a2f] bg-[#fffbe2] px-3 py-2 shadow-[4px_4px_0_0_#c4974d]">
-      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#9a5b0d]">
-        <Icon className="h-4 w-4 text-[#d97706]" />
+    <div className="border-[3px] border-[#6d5b3d] bg-[#fffaf0] px-3 py-2 shadow-[4px_4px_0_0_#d8ccb2]">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#946829]">
+        <Icon className="h-4 w-4 text-[#d9911a]" />
         {label}
       </div>
-      <div className="mt-1 text-xl font-black text-[#5a3b14]">{value}</div>
+      <div className="mt-1 text-xl font-extrabold text-[#563c16]">{value}</div>
     </div>
   );
 }
 
 function BattleStat({ label, value, note }) {
   return (
-    <div className="border-4 border-[#5b4a2f] bg-[#fffbe8] px-4 py-3 text-left shadow-[4px_4px_0_0_#cfb46a]">
-      <div className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#b06a11]">{label}</div>
-      <div className="mt-1 text-2xl font-black text-[#4d3514]">{value}</div>
-      <div className="text-xs text-[#7a6740]">{note}</div>
+    <div className="border-[3px] border-[#6d5b3d] bg-[#fffaf0] px-4 py-3 text-left shadow-[4px_4px_0_0_#d8ccb2]">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#a7772a]">{label}</div>
+      <div className="mt-1 text-2xl font-extrabold text-[#4d3616]">{value}</div>
+      <div className="text-xs text-[#75684e]">{note}</div>
     </div>
   );
 }
 
 function RecordCard({ label, value, tone = "gold" }) {
   const tones = {
-    gold: "bg-[#ffe7a3] text-[#7a4b14]",
-    rose: "bg-[#ffd0d8] text-[#8f2342]",
-    violet: "bg-[#ead8ff] text-[#6247aa]",
-    emerald: "bg-[#d7f7d7] text-[#1f6a46]",
-    sky: "bg-[#d8efff] text-[#225f8c]",
+    gold: "bg-[#fff0c4] text-[#8d5a13]",
+    rose: "bg-[#ffe2e7] text-[#9a4151]",
+    violet: "bg-[#efe8ff] text-[#6652a8]",
+    emerald: "bg-[#e4f6e5] text-[#2e7251]",
+    sky: "bg-[#e2f3ff] text-[#336a92]",
   };
 
   return (
-    <div className="border-4 border-[#5b4a2f] bg-[#fff9df] px-4 py-4 shadow-[6px_6px_0_0_#c4974d]">
-      <div className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#b06a11]">{label}</div>
-      <div className={`mt-2 border-2 border-[#5b4a2f] px-3 py-4 text-center text-3xl font-black ${tones[tone]}`}>
+    <div className="border-[3px] border-[#6d5b3d] bg-[#fffdf6] px-4 py-4 shadow-[6px_6px_0_0_#d8ccb2]">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#a7772a]">{label}</div>
+      <div className={`mt-2 border-2 border-[#6d5b3d] px-3 py-4 text-center text-3xl font-extrabold ${tones[tone]}`}>
         {value}
       </div>
     </div>
@@ -586,12 +580,12 @@ function RecordCard({ label, value, tone = "gold" }) {
 
 function ActionButton({ children, className = "", variant = "primary", disabled = false, ...props }) {
   const base =
-    "inline-flex items-center gap-2 border-4 px-4 py-3 text-sm font-black tracking-[0.08em] transition active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45";
+    "inline-flex items-center gap-2 border-[3px] px-4 py-3 text-sm font-bold tracking-[-0.01em] transition active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45";
   const variants = {
     primary:
-      "border-[#5b4a2f] bg-[#f59e0b] text-[#fffdf2] shadow-[0_6px_0_0_#9a5b0d] hover:brightness-105",
+      "border-[#6d5b3d] bg-[#eda12d] text-[#fffdf7] shadow-[0_6px_0_0_#b37214] hover:brightness-105",
     secondary:
-      "border-[#5b4a2f] bg-[#8b5cf6] text-[#fffdf2] shadow-[0_6px_0_0_#6247aa] hover:brightness-105",
+      "border-[#6d5b3d] bg-[#9085f2] text-[#fffdf7] shadow-[0_6px_0_0_#6759c9] hover:brightness-105",
   };
 
   return (
@@ -604,7 +598,7 @@ function ActionButton({ children, className = "", variant = "primary", disabled 
 function Input({ className = "", ...props }) {
   return (
     <input
-      className={`w-full border-4 border-[#5b4a2f] bg-[#fffdf2] px-3 py-3 text-sm text-[#4d3514] outline-none placeholder:text-[#9b8a65] focus:bg-white ${className}`}
+      className={`w-full border-[3px] border-[#6d5b3d] bg-[#fffdf8] px-3 py-3 text-sm text-[#46351d] outline-none placeholder:text-[#9d9075] focus:bg-white ${className}`}
       {...props}
     />
   );
@@ -613,7 +607,7 @@ function Input({ className = "", ...props }) {
 function Textarea({ className = "", ...props }) {
   return (
     <textarea
-      className={`w-full border-4 border-[#5b4a2f] bg-[#fffdf2] px-3 py-3 text-sm leading-6 text-[#4d3514] outline-none placeholder:text-[#9b8a65] focus:bg-white ${className}`}
+      className={`w-full border-[3px] border-[#6d5b3d] bg-[#fffdf8] px-3 py-3 text-sm leading-7 text-[#46351d] outline-none placeholder:text-[#9d9075] focus:bg-white ${className}`}
       {...props}
     />
   );
@@ -622,7 +616,7 @@ function Textarea({ className = "", ...props }) {
 function NumberInput({ label, value, onChange }) {
   return (
     <label className="block space-y-2">
-      <span className="text-xs font-bold tracking-[0.08em] text-[#6d4c1d]">{label}</span>
+      <span className="text-xs font-semibold tracking-[-0.01em] text-[#645438]">{label}</span>
       <Input type="number" value={value} onChange={(event) => onChange(event.target.value)} />
     </label>
   );
