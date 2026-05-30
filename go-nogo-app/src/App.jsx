@@ -1,13 +1,22 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-// shadcn/ui 없이 Vite 기본 React 프로젝트에서 바로 실행되도록 만든 간단한 UI 컴포넌트입니다.
-import { Play, RotateCcw, Save, Sparkles, Settings, Trophy, Zap } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Play,
+  RotateCcw,
+  Save,
+  Shield,
+  Sparkles,
+  Swords,
+  TimerReset,
+  Trophy,
+  WandSparkles,
+} from "lucide-react";
 
 const STORAGE_KEY = "go-nogo-practice-config-v1";
 
 const DEFAULT_CONFIG = {
-  goWords: ["green", "start", "yes", "go", "click"],
-  noGoWords: ["red", "stop", "no", "wait", "hold"],
+  goWords: ["attack", "charge", "advance", "slash", "focus"],
+  noGoWords: ["curse", "halt", "trap", "guard", "wait"],
   testTimeSec: 60,
   responseLimitMs: 900,
   stimulusIntervalMs: 1200,
@@ -64,8 +73,7 @@ function pickRandomItem(items) {
 }
 
 function createTrial(config) {
-  const goChance = 0.7;
-  const isGo = Math.random() < goChance;
+  const isGo = Math.random() < 0.7;
   const pool = isGo ? config.goWords : config.noGoWords;
   const fallbackPool = isGo ? DEFAULT_CONFIG.goWords : DEFAULT_CONFIG.noGoWords;
 
@@ -76,6 +84,15 @@ function createTrial(config) {
     startedAt: performance.now(),
   };
 }
+
+const FEEDBACK_STYLES = {
+  hit: "border-amber-300/70 bg-amber-100 text-amber-950",
+  good: "border-emerald-300/70 bg-emerald-100 text-emerald-950",
+  bad: "border-rose-300/70 bg-rose-100 text-rose-950",
+  saved: "border-sky-300/70 bg-sky-100 text-sky-950",
+  ready: "border-violet-300/70 bg-violet-100 text-violet-950",
+  done: "border-slate-300/70 bg-slate-100 text-slate-950",
+};
 
 export default function GoNoGoPracticeApp() {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
@@ -114,6 +131,13 @@ export default function GoNoGoPracticeApp() {
     trialRef.current = currentTrial;
   }, [currentTrial]);
 
+  useEffect(() => {
+    return () => {
+      clearInterval(intervalRef.current);
+      clearInterval(timerRef.current);
+    };
+  }, []);
+
   const averageReactionTime = useMemo(() => {
     if (!score.reactionTimes.length) return 0;
     const total = score.reactionTimes.reduce((sum, time) => sum + time, 0);
@@ -135,7 +159,7 @@ export default function GoNoGoPracticeApp() {
     setConfig(nextConfig);
     setJsonText(JSON.stringify(nextConfig, null, 2));
     setTimeLeft(nextConfig.testTimeSec);
-    setFeedback({ type: "saved", text: "단어 목록 저장 완료" });
+    setFeedback({ type: "saved", text: "주문 목록을 두루마리에 기록했습니다." });
   }
 
   function syncFromJson() {
@@ -147,9 +171,9 @@ export default function GoNoGoPracticeApp() {
       setNoGoInput(nextConfig.noGoWords.join(", "));
       setJsonText(JSON.stringify(nextConfig, null, 2));
       setTimeLeft(nextConfig.testTimeSec);
-      setFeedback({ type: "saved", text: "JSON 설정 저장 완료" });
+      setFeedback({ type: "saved", text: "전술서 설정을 적용했습니다." });
     } catch {
-      setFeedback({ type: "bad", text: "JSON 형식이 올바르지 않음" });
+      setFeedback({ type: "bad", text: "JSON 주문서 형식이 올바르지 않습니다." });
     }
   }
 
@@ -179,6 +203,7 @@ export default function GoNoGoPracticeApp() {
     setCurrentTrial(null);
     clearInterval(intervalRef.current);
     clearInterval(timerRef.current);
+    setFeedback({ type: "done", text: "훈련을 멈추고 전열을 정비했습니다." });
   }
 
   function startTest() {
@@ -193,7 +218,7 @@ export default function GoNoGoPracticeApp() {
     setTimeLeft(nextConfig.testTimeSec);
     resetScore();
     setIsRunning(true);
-    setFeedback({ type: "ready", text: "GO 단어가 나오면 Space 또는 클릭" });
+    setFeedback({ type: "ready", text: "GO 단어가 뜨면 스페이스 또는 공격 버튼을 누르세요." });
 
     const firstTrial = createTrial(nextConfig);
     setCurrentTrial(firstTrial);
@@ -210,7 +235,7 @@ export default function GoNoGoPracticeApp() {
         if (activeTrial.type === "GO") {
           setScore((prev) => ({ ...prev, misses: prev.misses + 1 }));
           setCombo(0);
-          setFeedback({ type: "bad", text: "MISS" });
+          setFeedback({ type: "bad", text: "공격 기회를 놓쳤습니다." });
         } else {
           setScore((prev) => ({ ...prev, correctRejections: prev.correctRejections + 1 }));
           setCombo((prev) => {
@@ -218,7 +243,7 @@ export default function GoNoGoPracticeApp() {
             setBestCombo((best) => Math.max(best, next));
             return next;
           });
-          setFeedback({ type: "good", text: "참기 성공" });
+          setFeedback({ type: "good", text: "함정을 침착하게 피했습니다." });
         }
       }
 
@@ -232,7 +257,7 @@ export default function GoNoGoPracticeApp() {
           clearInterval(timerRef.current);
           setIsRunning(false);
           setCurrentTrial(null);
-          setFeedback({ type: "done", text: "테스트 종료" });
+          setFeedback({ type: "done", text: "전투 훈련이 종료되었습니다." });
           return 0;
         }
         return prev - 1;
@@ -259,15 +284,18 @@ export default function GoNoGoPracticeApp() {
         setBestCombo((best) => Math.max(best, next));
         return next;
       });
-      setFeedback({ type: "hit", text: `+${Math.max(10, Math.round(1000 / Math.max(1, reactionTime)))} HIT · ${reactionTime}ms` });
+      setFeedback({
+        type: "hit",
+        text: `회심의 일격 ${reactionTime}ms`,
+      });
     } else if (currentTrial.type === "GO" && isTooLate) {
       setScore((prev) => ({ ...prev, misses: prev.misses + 1 }));
       setCombo(0);
-      setFeedback({ type: "bad", text: `TOO LATE · ${reactionTime}ms` });
+      setFeedback({ type: "bad", text: `반응이 늦었습니다 ${reactionTime}ms` });
     } else {
       setScore((prev) => ({ ...prev, falseAlarms: prev.falseAlarms + 1 }));
       setCombo(0);
-      setFeedback({ type: "bad", text: "NOGO 오답" });
+      setFeedback({ type: "bad", text: "함정 단어에 속았습니다." });
     }
   }
 
@@ -283,195 +311,218 @@ export default function GoNoGoPracticeApp() {
     return () => window.removeEventListener("keydown", onKeyDown);
   });
 
-  useEffect(() => {
-    return () => {
-      clearInterval(intervalRef.current);
-      clearInterval(timerRef.current);
-    };
-  }, []);
-
-  const feedbackClass = {
-    hit: "bg-emerald-100 text-emerald-800 border-emerald-300",
-    good: "bg-blue-100 text-blue-800 border-blue-300",
-    bad: "bg-rose-100 text-rose-800 border-rose-300",
-    saved: "bg-violet-100 text-violet-800 border-violet-300",
-    ready: "bg-amber-100 text-amber-800 border-amber-300",
-    done: "bg-slate-100 text-slate-800 border-slate-300",
-  }[feedback?.type || "done"];
+  const feedbackClass = FEEDBACK_STYLES[feedback?.type || "done"];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-violet-300">
-              <Zap className="h-5 w-5" />
-              <span className="text-sm font-semibold uppercase tracking-wider">Go / No-Go Practice</span>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#25305f_0%,#151631_35%,#090b18_100%)] px-3 py-4 text-[#fff7de] sm:px-4 sm:py-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-7xl flex-col gap-4 rounded-[28px] border border-[#f8de9c]/30 bg-[#100f24]/80 p-3 shadow-[0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur sm:gap-6 sm:p-5 lg:p-6">
+        <header className="relative overflow-hidden rounded-[24px] border border-[#f8de9c]/40 bg-[linear-gradient(135deg,rgba(42,58,118,0.95),rgba(18,20,52,0.95))] px-4 py-5 shadow-[inset_0_0_0_2px_rgba(255,247,222,0.08)] sm:px-6 sm:py-6">
+          <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(255,240,185,0.18),transparent_70%)]" />
+          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#f8de9c]/40 bg-[#1d2146]/80 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.35em] text-[#ffe497]">
+                <WandSparkles className="h-4 w-4" />
+                Dragon Quest Style Training
+              </div>
+              <h1 className="mt-3 text-3xl font-black tracking-[0.06em] text-[#fff6d9] sm:text-4xl lg:text-5xl">
+                용사의 반응 수련장
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-[#e7dbb3] sm:text-base">
+                전통 JRPG 전투 화면 감성으로 다시 꾸민 Go / No-Go 훈련입니다. 웹에서는 넓은 전투 보드로,
+                앱에서는 손가락으로 바로 누르기 쉬운 세로형 인터페이스로 동작합니다.
+              </p>
             </div>
-            <h1 className="mt-2 text-3xl md:text-5xl font-black tracking-tight">반응 억제 훈련 게임</h1>
-            <p className="mt-2 max-w-2xl text-slate-400">
-              GO 단어가 나오면 Space 또는 버튼을 누르고, NOGO 단어는 참으세요. 단어와 테스트 설정은 JSON / 쉼표 입력 모두 지원합니다.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={isRunning ? stopTest : startTest} className="rounded-2xl px-5 py-6 text-base font-bold">
-              {isRunning ? "중지" : "시작"}
-              {!isRunning && <Play className="ml-2 h-4 w-4" />}
-            </Button>
-            <Button onClick={resetScore} variant="secondary" className="rounded-2xl px-4 py-6">
-              <RotateCcw className="h-4 w-4" />
-            </Button>
+
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+              <StatusBadge icon={TimerReset} label="남은 시간" value={`${timeLeft}s`} />
+              <StatusBadge icon={Sparkles} label="콤보" value={`${combo}`} />
+              <ActionButton
+                onClick={isRunning ? stopTest : startTest}
+                className="col-span-2 sm:col-span-1"
+              >
+                {isRunning ? "훈련 중지" : "훈련 시작"}
+                {!isRunning && <Play className="h-4 w-4" />}
+              </ActionButton>
+              <ActionButton
+                onClick={resetScore}
+                variant="secondary"
+                className="col-span-2 sm:col-span-1"
+              >
+                전적 초기화
+                <RotateCcw className="h-4 w-4" />
+              </ActionButton>
+            </div>
           </div>
         </header>
 
-        <main className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-          <section className="space-y-6">
-            <Card className="overflow-hidden rounded-3xl border-slate-800 bg-slate-900/70 shadow-2xl">
-              <CardContent className="p-0">
-                <div className="relative flex min-h-[430px] flex-col items-center justify-center overflow-hidden p-6">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.18),transparent_45%)]" />
+        <main className="grid flex-1 gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.85fr)]">
+          <section className="flex min-h-0 flex-col gap-4">
+            <Panel className="relative flex-1 overflow-hidden bg-[linear-gradient(180deg,rgba(30,38,82,0.96),rgba(11,12,28,0.96))] p-0">
+              <div className="absolute inset-x-0 top-0 h-2 bg-[linear-gradient(90deg,#f7d98e,#fff0c4,#f7d98e)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(112,173,255,0.18),transparent_28%),radial-gradient(circle_at_50%_100%,rgba(255,215,130,0.12),transparent_40%)]" />
 
-                  <div className="absolute left-6 top-6 flex gap-2">
-                    <Badge className="rounded-full bg-slate-800 px-4 py-2 text-slate-200">남은 시간 {timeLeft}s</Badge>
-                    <Badge className="rounded-full bg-slate-800 px-4 py-2 text-slate-200">콤보 {combo}</Badge>
+              <div className="relative flex min-h-[460px] flex-col justify-between px-4 py-4 sm:px-6 sm:py-5">
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <BattleStat label="정확도" value={`${accuracy}%`} note="명중률" />
+                  <BattleStat
+                    label="평균 반응"
+                    value={averageReactionTime ? `${averageReactionTime}ms` : "-"}
+                    note="속도"
+                  />
+                  <BattleStat label="최고 콤보" value={`${bestCombo}`} note="연속" />
+                </div>
+
+                <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
+                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#f7d98e]/35 bg-[#141935]/85 px-3 py-1 text-xs font-bold tracking-[0.25em] text-[#ffe497]">
+                    <Shield className="h-4 w-4" />
+                    {currentTrial ? `조우 타입 ${currentTrial.type}` : "전투 대기"}
                   </div>
 
                   <AnimatePresence mode="wait">
                     {currentTrial ? (
                       <motion.div
                         key={currentTrial.id}
-                        initial={{ opacity: 0, scale: 0.7, y: 30 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 1.25, y: -30 }}
-                        transition={{ type: "spring", stiffness: 280, damping: 18 }}
-                        className="relative z-10 text-center"
+                        initial={{ opacity: 0, y: 28, scale: 0.88 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -18, scale: 1.08 }}
+                        transition={{ type: "spring", stiffness: 220, damping: 18 }}
+                        className="w-full max-w-2xl"
                       >
-                        <div className="mb-5 text-sm font-bold tracking-[0.35em] text-slate-500">{currentTrial.type}</div>
-                        <div className="rounded-[2rem] border border-slate-700 bg-slate-950/70 px-12 py-10 shadow-2xl">
-                          <div className="text-6xl md:text-8xl font-black tracking-tight">{currentTrial.word}</div>
+                        <div className="rounded-[26px] border-4 border-[#f7d98e]/50 bg-[linear-gradient(180deg,rgba(255,248,221,0.12),rgba(255,248,221,0.04))] px-5 py-10 shadow-[0_22px_60px_rgba(0,0,0,0.35)] sm:px-8 sm:py-14">
+                          <div className="mb-4 text-xs font-bold uppercase tracking-[0.5em] text-[#f7d98e]">
+                            {currentTrial.type === "GO" ? "Attack Command" : "Trap Command"}
+                          </div>
+                          <div className="break-words text-4xl font-black tracking-[0.08em] text-[#fff8e5] sm:text-6xl lg:text-7xl">
+                            {currentTrial.word}
+                          </div>
                         </div>
                       </motion.div>
                     ) : (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10 text-center text-slate-400">
-                        <Trophy className="mx-auto mb-4 h-14 w-14 text-violet-300" />
-                        <div className="text-2xl font-bold">시작 버튼을 누르세요</div>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="w-full max-w-xl rounded-[24px] border border-[#f7d98e]/35 bg-[#12162f]/80 px-6 py-10"
+                      >
+                        <Trophy className="mx-auto mb-4 h-14 w-14 text-[#ffe497]" />
+                        <div className="text-2xl font-black tracking-[0.08em] text-[#fff8e5]">
+                          여정을 시작할 준비가 되었습니다
+                        </div>
+                        <p className="mt-3 text-sm leading-6 text-[#d7c99c]">
+                          GO 단어가 나타나면 바로 공격하고, NOGO 단어가 나타나면 침착하게 멈추세요.
+                        </p>
                       </motion.div>
                     )}
                   </AnimatePresence>
+                </div>
 
+                <div className="space-y-3">
                   <AnimatePresence>
                     {feedback && (
                       <motion.div
                         key={`${feedback.type}-${feedback.text}-${combo}`}
-                        initial={{ opacity: 0, y: 30, scale: 0.85 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        className={`absolute bottom-28 z-20 rounded-2xl border px-5 py-3 text-lg font-black shadow-xl ${feedbackClass}`}
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className={`rounded-[18px] border px-4 py-3 text-center text-sm font-bold shadow-[0_12px_40px_rgba(0,0,0,0.28)] sm:text-base ${feedbackClass}`}
                       >
-                        <div className="flex items-center gap-2">
-                          {(feedback.type === "hit" || feedback.type === "good") && <Sparkles className="h-5 w-5" />}
-                          {feedback.text}
-                        </div>
+                        {feedback.text}
                       </motion.div>
                     )}
                   </AnimatePresence>
 
-                  <AnimatePresence>
-                    {feedback?.type === "hit" && (
-                      <motion.div
-                        key={`burst-${combo}-${score.hits}`}
-                        initial={{ opacity: 0.9, scale: 0 }}
-                        animate={{ opacity: 0, scale: 3.5 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.55 }}
-                        className="absolute z-0 h-48 w-48 rounded-full border-8 border-violet-400"
-                      />
-                    )}
-                  </AnimatePresence>
-
-                  <Button
+                  <ActionButton
                     onClick={handleGoResponse}
                     disabled={!isRunning}
-                    className="absolute bottom-6 z-10 rounded-3xl px-10 py-8 text-xl font-black shadow-2xl active:scale-95"
+                    className="w-full justify-center rounded-[22px] px-6 py-4 text-base sm:py-5 sm:text-lg"
                   >
-                    GO!
-                  </Button>
+                    <Swords className="h-5 w-5" />
+                    공격하기
+                    <span className="rounded-full bg-black/20 px-2 py-1 text-[11px] tracking-[0.25em] text-white/85">
+                      SPACE
+                    </span>
+                  </ActionButton>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Panel>
 
-            <div className="grid gap-4 md:grid-cols-5">
-              <StatCard label="정확도" value={`${accuracy}%`} />
-              <StatCard label="평균 반응" value={averageReactionTime ? `${averageReactionTime}ms` : "-"} />
-              <StatCard label="Hit" value={score.hits} />
-              <StatCard label="False Alarm" value={score.falseAlarms} />
-              <StatCard label="Best Combo" value={bestCombo} />
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              <RecordCard label="HIT" value={score.hits} tone="gold" />
+              <RecordCard label="MISS" value={score.misses} tone="rose" />
+              <RecordCard label="FALSE" value={score.falseAlarms} tone="violet" />
+              <RecordCard label="GUARD" value={score.correctRejections} tone="emerald" />
+              <RecordCard label="COMBO" value={bestCombo} tone="sky" />
             </div>
           </section>
 
-          <aside className="space-y-6">
-            <Card className="rounded-3xl border-slate-800 bg-slate-900/70 shadow-xl">
-              <CardContent className="space-y-4 p-5">
-                <div className="flex items-center gap-2 text-slate-200">
-                  <Settings className="h-5 w-5 text-violet-300" />
-                  <h2 className="text-xl font-black">단어 설정</h2>
-                </div>
+          <aside className="flex min-h-0 flex-col gap-4">
+            <Panel className="bg-[linear-gradient(180deg,rgba(27,29,60,0.96),rgba(14,15,34,0.96))] p-4 sm:p-5">
+              <SectionTitle icon={Save} title="명령어 도감" />
 
-                <label className="space-y-2 block">
-                  <span className="text-sm font-bold text-emerald-300">GO 단어 쉼표 입력</span>
-                  <Textarea
-                    value={goInput}
-                    onChange={(event) => setGoInput(event.target.value)}
-                    placeholder="green, start, yes"
-                    className="min-h-24 rounded-2xl border-slate-700 bg-slate-950 text-slate-100"
-                  />
-                </label>
+              <label className="mt-4 block space-y-2">
+                <span className="text-sm font-bold text-[#ffe497]">GO 단어</span>
+                <Textarea
+                  value={goInput}
+                  onChange={(event) => setGoInput(event.target.value)}
+                  placeholder="attack, charge, advance"
+                  className="min-h-28"
+                />
+              </label>
 
-                <label className="space-y-2 block">
-                  <span className="text-sm font-bold text-rose-300">NOGO 단어 쉼표 입력</span>
-                  <Textarea
-                    value={noGoInput}
-                    onChange={(event) => setNoGoInput(event.target.value)}
-                    placeholder="red, stop, no"
-                    className="min-h-24 rounded-2xl border-slate-700 bg-slate-950 text-slate-100"
-                  />
-                </label>
+              <label className="mt-4 block space-y-2">
+                <span className="text-sm font-bold text-[#ffd1c4]">NOGO 단어</span>
+                <Textarea
+                  value={noGoInput}
+                  onChange={(event) => setNoGoInput(event.target.value)}
+                  placeholder="trap, halt, wait"
+                  className="min-h-28"
+                />
+              </label>
 
-                <Button onClick={syncFromCommaInputs} className="w-full rounded-2xl py-6 font-black">
-                  <Save className="mr-2 h-4 w-4" />
-                  쉼표 입력을 JSON으로 저장
-                </Button>
-              </CardContent>
-            </Card>
+              <ActionButton onClick={syncFromCommaInputs} className="mt-4 w-full justify-center">
+                <Save className="h-4 w-4" />
+                단어 목록 저장
+              </ActionButton>
+            </Panel>
 
-            <Card className="rounded-3xl border-slate-800 bg-slate-900/70 shadow-xl">
-              <CardContent className="space-y-4 p-5">
-                <h2 className="text-xl font-black">테스트 설정</h2>
+            <Panel className="bg-[linear-gradient(180deg,rgba(27,29,60,0.96),rgba(14,15,34,0.96))] p-4 sm:p-5">
+              <SectionTitle icon={TimerReset} title="전술 세팅" />
 
-                <div className="grid grid-cols-3 gap-3">
-                  <NumberInput label="시간초" value={config.testTimeSec} onChange={(value) => updateNumberSetting("testTimeSec", value)} />
-                  <NumberInput label="반응제한ms" value={config.responseLimitMs} onChange={(value) => updateNumberSetting("responseLimitMs", value)} />
-                  <NumberInput label="간격ms" value={config.stimulusIntervalMs} onChange={(value) => updateNumberSetting("stimulusIntervalMs", value)} />
-                </div>
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <NumberInput
+                  label="훈련 시간(초)"
+                  value={config.testTimeSec}
+                  onChange={(value) => updateNumberSetting("testTimeSec", value)}
+                />
+                <NumberInput
+                  label="반응 제한(ms)"
+                  value={config.responseLimitMs}
+                  onChange={(value) => updateNumberSetting("responseLimitMs", value)}
+                />
+                <NumberInput
+                  label="등장 간격(ms)"
+                  value={config.stimulusIntervalMs}
+                  onChange={(value) => updateNumberSetting("stimulusIntervalMs", value)}
+                />
+              </div>
 
-                <label className="space-y-2 block">
-                  <span className="text-sm font-bold text-slate-300">JSON 직접 편집</span>
-                  <Textarea
-                    value={jsonText}
-                    onChange={(event) => setJsonText(event.target.value)}
-                    className="min-h-56 rounded-2xl border-slate-700 bg-slate-950 font-mono text-xs text-slate-100"
-                  />
-                </label>
+              <label className="mt-4 block space-y-2">
+                <span className="text-sm font-bold text-[#d8cdf8]">JSON 전술서</span>
+                <Textarea
+                  value={jsonText}
+                  onChange={(event) => setJsonText(event.target.value)}
+                  className="min-h-64 font-mono text-xs"
+                />
+              </label>
 
-                <Button onClick={syncFromJson} variant="secondary" className="w-full rounded-2xl py-6 font-black">
-                  JSON 적용 및 저장
-                </Button>
+              <ActionButton onClick={syncFromJson} variant="secondary" className="mt-4 w-full justify-center">
+                JSON 적용
+              </ActionButton>
 
-                <p className="text-xs leading-relaxed text-slate-500">
-                  저장 위치: 브라우저 localStorage. 같은 브라우저와 같은 localhost 주소에서 다시 열면 이전 단어 목록이 유지됩니다.
-                </p>
-              </CardContent>
-            </Card>
+              <p className="mt-4 text-xs leading-6 text-[#d5c897]">
+                설정은 현재 브라우저의 localStorage에 저장됩니다. 같은 기기와 주소에서 다시 열면 이어서
+                사용할 수 있습니다.
+              </p>
+            </Panel>
           </aside>
         </main>
       </div>
@@ -479,11 +530,76 @@ export default function GoNoGoPracticeApp() {
   );
 }
 
-function Button({ children, className = "", variant = "primary", disabled = false, ...props }) {
-  const base = "inline-flex items-center justify-center gap-2 border transition disabled:cursor-not-allowed disabled:opacity-50";
+function Panel({ children, className = "" }) {
+  return (
+    <div
+      className={`rounded-[26px] border border-[#f7d98e]/30 shadow-[inset_0_0_0_2px_rgba(255,247,222,0.06),0_18px_48px_rgba(0,0,0,0.32)] ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SectionTitle({ icon: Icon, title }) {
+  return (
+    <div className="flex items-center gap-2 text-[#fff0c4]">
+      <div className="rounded-full border border-[#f7d98e]/40 bg-[#181c3c] p-2">
+        <Icon className="h-4 w-4" />
+      </div>
+      <h2 className="text-lg font-black tracking-[0.08em] sm:text-xl">{title}</h2>
+    </div>
+  );
+}
+
+function StatusBadge({ icon: Icon, label, value }) {
+  return (
+    <div className="rounded-[18px] border border-[#f7d98e]/35 bg-[#171b3a]/80 px-3 py-2 shadow-[inset_0_0_0_1px_rgba(255,247,222,0.06)]">
+      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.25em] text-[#d8cdf8]">
+        <Icon className="h-4 w-4 text-[#ffe497]" />
+        {label}
+      </div>
+      <div className="mt-1 text-xl font-black text-[#fff8e5]">{value}</div>
+    </div>
+  );
+}
+
+function BattleStat({ label, value, note }) {
+  return (
+    <div className="rounded-[18px] border border-[#f7d98e]/25 bg-[#12152f]/75 px-4 py-3 text-left shadow-[inset_0_0_0_1px_rgba(255,247,222,0.05)]">
+      <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#cdbf8a]">{label}</div>
+      <div className="mt-1 text-2xl font-black text-[#fff7de]">{value}</div>
+      <div className="text-xs text-[#b9b1d4]">{note}</div>
+    </div>
+  );
+}
+
+function RecordCard({ label, value, tone = "gold" }) {
+  const tones = {
+    gold: "from-[#ffe8a3]/20 to-[#d49f1f]/15 text-[#fff2c2]",
+    rose: "from-[#ffb6bf]/20 to-[#9e3b58]/15 text-[#ffe0e6]",
+    violet: "from-[#d5b6ff]/20 to-[#6240a1]/15 text-[#efe3ff]",
+    emerald: "from-[#bdf6db]/20 to-[#267d58]/15 text-[#dffcec]",
+    sky: "from-[#b9dbff]/20 to-[#305e9f]/15 text-[#e1f0ff]",
+  };
+
+  return (
+    <div className={`rounded-[20px] border border-[#f7d98e]/25 bg-[linear-gradient(180deg,rgba(20,23,49,0.95),rgba(11,12,28,0.95))] px-4 py-4`}>
+      <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#cdbf8a]">{label}</div>
+      <div className={`mt-2 rounded-[16px] bg-gradient-to-br px-3 py-4 text-center text-3xl font-black shadow-inner ${tones[tone]}`}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function ActionButton({ children, className = "", variant = "primary", disabled = false, ...props }) {
+  const base =
+    "inline-flex items-center gap-2 rounded-[18px] border px-4 py-3 text-sm font-black tracking-[0.08em] transition active:translate-y-px disabled:cursor-not-allowed disabled:opacity-45";
   const variants = {
-    primary: "border-violet-500 bg-violet-600 text-white hover:bg-violet-500",
-    secondary: "border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700",
+    primary:
+      "border-[#ffe497]/60 bg-[linear-gradient(180deg,#d07a22,#8d3f11)] text-[#fff8eb] shadow-[0_8px_0_0_rgba(74,31,10,0.9)] hover:brightness-110",
+    secondary:
+      "border-[#cbbbf9]/45 bg-[linear-gradient(180deg,#51428f,#2e235d)] text-[#f6f2ff] shadow-[0_8px_0_0_rgba(21,15,46,0.95)] hover:brightness-110",
   };
 
   return (
@@ -493,47 +609,29 @@ function Button({ children, className = "", variant = "primary", disabled = fals
   );
 }
 
-function Card({ children, className = "" }) {
-  return <div className={className}>{children}</div>;
-}
-
-function CardContent({ children, className = "" }) {
-  return <div className={className}>{children}</div>;
-}
-
 function Input({ className = "", ...props }) {
-  return <input className={`px-3 py-2 outline-none ${className}`} {...props} />;
+  return (
+    <input
+      className={`w-full rounded-[16px] border border-[#f7d98e]/25 bg-[#0f1330] px-3 py-3 text-sm text-[#fff8e5] outline-none placeholder:text-[#8f8aa8] focus:border-[#ffe497] focus:ring-2 focus:ring-[#ffe497]/25 ${className}`}
+      {...props}
+    />
+  );
 }
 
 function Textarea({ className = "", ...props }) {
-  return <textarea className={`px-3 py-2 outline-none ${className}`} {...props} />;
-}
-
-function Badge({ children, className = "" }) {
-  return <span className={`inline-flex items-center ${className}`}>{children}</span>;
-}
-
-function StatCard({ label, value }) {
   return (
-    <Card className="rounded-3xl border border-slate-800 bg-slate-900/70 shadow-xl">
-      <CardContent className="p-4">
-        <div className="text-xs font-bold uppercase tracking-wider text-slate-500">{label}</div>
-        <div className="mt-2 text-2xl font-black text-slate-100">{value}</div>
-      </CardContent>
-    </Card>
+    <textarea
+      className={`w-full rounded-[18px] border border-[#f7d98e]/25 bg-[#0f1330] px-3 py-3 text-sm leading-6 text-[#fff8e5] outline-none placeholder:text-[#8f8aa8] focus:border-[#ffe497] focus:ring-2 focus:ring-[#ffe497]/25 ${className}`}
+      {...props}
+    />
   );
 }
 
 function NumberInput({ label, value, onChange }) {
   return (
-    <label className="space-y-2 block">
-      <span className="text-xs font-bold text-slate-400">{label}</span>
-      <Input
-        type="number"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-2xl border border-slate-700 bg-slate-950 text-slate-100"
-      />
+    <label className="block space-y-2">
+      <span className="text-xs font-bold tracking-[0.08em] text-[#d8cdf8]">{label}</span>
+      <Input type="number" value={value} onChange={(event) => onChange(event.target.value)} />
     </label>
   );
 }
